@@ -1,7 +1,7 @@
 const worldEl = document.getElementById('world');
 const nameInput = document.getElementById('nameInput');
 const chatInput = document.getElementById('chatInput');
-const API_URL = 'https://tinkr.tech/sdb/poly/wander';
+const API_URL = 'https://tinkr.tech/sdb/wanderworldIlja/wanderworldIlja';
 
 let playerKey = localStorage.getItem('player_key');
 
@@ -38,7 +38,7 @@ async function updateWorld() {
             worldEl.appendChild(char);
         });
     } catch (err) {
-        console.error("Viga andmete laadimisel:", err);
+        console.error(err);
     }
 }
 
@@ -46,18 +46,25 @@ async function joinWorld() {
     const name = nameInput.value.trim();
     if (!name) return alert("Sisesta nimi!");
 
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'join', username: name })
-    });
-    
-    const result = await response.json();
-    if (result.ok) {
-        playerKey = result.player_key;
-        localStorage.setItem('player_key', playerKey);
-        alert("Oled maailmas!");
-    } else {
-        alert("Viga: " + result.error);
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ action: 'join', username: name })
+        });
+        
+        const result = await response.json();
+        if (result.ok) {
+            playerKey = result.player_key;
+            localStorage.setItem('player_key', playerKey);
+            alert("Oled maailmas!");
+        } else {
+            alert("Viga: " + (result.error || "Tundmatu viga"));
+        }
+    } catch (err) {
+        alert("Side viga serveriga");
     }
 }
 
@@ -68,6 +75,9 @@ async function sendMessage() {
 
     await fetch(API_URL, {
         method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
             action: 'talk',
             player_key: playerKey,
@@ -86,6 +96,9 @@ worldEl.addEventListener('click', async (e) => {
 
     await fetch(API_URL, {
         method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
             action: 'move',
             player_key: playerKey,
